@@ -26,11 +26,14 @@ public class Question {
     private String[] options;
     @JsonIgnore
     private int[] answer;
+    @JsonIgnore
+    private long userId;
 
-    public Question(String title, String text, String[] options, int[] answer) {
+    public Question(String title, String text, String[] options, int[] answer, long userId) {
         this.title = title;
         this.text = text;
         this.options = options;
         this.answer = answer == null ? new int[]{} : answer;
+        this.userId = userId;
     }
 }

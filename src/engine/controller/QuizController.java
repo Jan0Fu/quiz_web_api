@@ -7,9 +7,13 @@ import engine.model.dto.QuizResponse;
 import engine.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -20,7 +24,7 @@ public class QuizController {
     private final QuizService quizService;
 
     @PostMapping("/quizzes")
-    public Question postQuiz(@Valid @RequestBody QuestionDto body) {
+    public Question postQuiz(@AuthenticationPrincipal Authentication auth, @Valid @RequestBody QuestionDto body) {
         return quizService.postQuiz(body);
     }
 
