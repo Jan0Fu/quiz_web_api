@@ -12,9 +12,9 @@ public interface QuizService {
 
     List<Question> getQuizzes();
 
-    QuizResponse postAnswer(int id, AnswerRequest answer);
+    QuizResponse postAnswer(long id, AnswerRequest answer);
 
-    ResponseEntity<Question> getQuestion(int id);
+    ResponseEntity<Question> getQuestion(long id);
 
     Question postQuiz(QuestionDto body);
 }

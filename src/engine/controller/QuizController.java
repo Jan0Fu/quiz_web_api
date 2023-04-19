@@ -30,12 +30,12 @@ public class QuizController {
     }
 
     @GetMapping("/quizzes/{id}")
-    public ResponseEntity<Question> getQuestion(@PathVariable int id) {
+    public ResponseEntity<Question> getQuestion(@PathVariable long id) {
         return quizService.getQuestion(id);
     }
 
     @PostMapping("/quizzes/{id}/solve")
-    public QuizResponse postAnswer(@PathVariable int id, @RequestBody AnswerRequest answer) {
+    public QuizResponse postAnswer(@PathVariable long id, @RequestBody AnswerRequest answer) {
         return quizService.postAnswer(id, answer);
     }
 }

@@ -14,7 +14,7 @@ public class QuestionDto {
     @NotNull
     private String text;
     @NotNull
-    @Size(min = 2, message = "Must have at least 2 options")
+    @Size(min = 2, message = "Must have 2 options minimum")
     private String[] options;
     private int[] answer;
 }
