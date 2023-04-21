@@ -1,20 +1,25 @@
 package engine.service;
 
 import engine.model.Question;
+import engine.model.User;
 import engine.model.dto.AnswerRequest;
-import engine.model.dto.QuestionDto;
-import engine.model.dto.QuizResponse;
-import org.springframework.http.ResponseEntity;
+import engine.model.dto.FeedbackResponse;
+import engine.model.dto.QuizPageResponse;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface QuizService {
 
-    List<Question> getQuizzes();
+    FeedbackResponse getFeedback(int answer);
 
-    QuizResponse postAnswer(long id, AnswerRequest answer);
+    Question addQuiz(Question quiz, User user);
 
-    ResponseEntity<Question> getQuestion(long id);
+    Optional<Question> getQuizById(long id);
 
-    Question postQuiz(QuestionDto body);
+    List<Question> findAllQuizzes();
+
+    FeedbackResponse feedbackByQuizId(long id, AnswerRequest answer);
+
+    void deleteQuizById(long id, User user);
 }

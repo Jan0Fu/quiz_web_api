@@ -1,39 +1,41 @@
 package engine.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
-@Data
 @NoArgsConstructor
+@Getter
+@Setter
 @Entity
-@Table(name = "questions")
+@Table(name = "quizzes")
 public class Question {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private long id;
-    @NotNull
+    @NotBlank
+    @NotEmpty
     private String title;
-    @NotNull
+    @NotBlank
+    @NotEmpty
     private String text;
+    @Size(min = 2)
     @NotNull
-    @Size(min = 2, message = "Must have 2 options minimum")
-    private String[] options;
-    @JsonIgnore
-    private int[] answer;
-    @JsonIgnore
-    private long userId;
-
-    public Question(String title, String text, String[] options, int[] answer, long userId) {
-        this.title = title;
-        this.text = text;
-        this.options = options;
-        this.answer = answer == null ? new int[]{} : answer;
-        this.userId = userId;
-    }
+    @ElementCollection
+    private List<String> options;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ElementCollection
+    private List<Integer> answer;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ManyToOne(targetEntity = User.class)
+    private User user;
 }

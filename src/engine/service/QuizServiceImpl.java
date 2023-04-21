@@ -1,14 +1,14 @@
 package engine.service;
 
 import engine.model.Question;
+import engine.model.User;
 import engine.model.dto.AnswerRequest;
-import engine.model.dto.QuestionDto;
-import engine.model.dto.QuizResponse;
+import engine.model.dto.FeedbackResponse;
 import engine.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,29 +21,88 @@ public class QuizServiceImpl implements QuizService {
     private final QuizRepository quizRepository;
 
     @Override
-    public Question postQuiz(QuestionDto body) {
-        Question quiz = new Question(body.getTitle(), body.getText(), body.getOptions(), body.getAnswer());
+    public FeedbackResponse getFeedback(int answer) {
+        final FeedbackResponse feedbackResponse;
+        if (answer == 2) {
+            feedbackResponse = new FeedbackResponse(true, "Congratulations, you're right!");
+        } else {
+            feedbackResponse = new FeedbackResponse(false, "Wrong answer! Please, try again.");
+        }
+        return feedbackResponse;
+    }
+
+    @Override
+    public Question addQuiz(Question quiz, User user) {
+        quiz.setUser(user);
         return quizRepository.save(quiz);
     }
 
     @Override
-    public List<Question> getQuizzes() {
+    public Optional<Question> getQuizById(long id) {
+        Optional<Question> quiz = quizRepository.findById(id);
+        if (quiz.isPresent()) {
+            return quiz;
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Override
+    public List<Question> findAllQuizzes() {
         return quizRepository.findAll();
     }
 
     @Override
-    public ResponseEntity<Question> getQuestion(long id) {
+    public FeedbackResponse feedbackByQuizId(long id, AnswerRequest answer) {
+        final FeedbackResponse successfulFeedback = new FeedbackResponse(true, "Congratulations, you're right!");
+        final FeedbackResponse failedFeedback = new FeedbackResponse(false, "Wrong answer! Please, try again.");
+        List<Integer> quizAnswers;
+
         Optional<Question> quiz = quizRepository.findById(id);
-        return quiz.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        if (quiz.isPresent()) {
+            quizAnswers = quiz.get().getAnswer();
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        if (quizAnswers == null && answer == null) {
+            return successfulFeedback;
+        }
+
+        if (quizAnswers == null) {
+            if (answer.getAnswer().isEmpty()) {
+                return successfulFeedback;
+            } else {
+                return failedFeedback;
+            }
+        }
+
+        if (answer == null) {
+            if (quizAnswers.isEmpty()) {
+                return successfulFeedback;
+            } else {
+                return failedFeedback;
+            }
+        }
+        if (quizAnswers.isEmpty() && answer.getAnswer().isEmpty()) {
+            return successfulFeedback;
+        }
+
+        if (Arrays.equals(quizAnswers.stream().sorted().toArray(), answer.getAnswer().stream().sorted().toArray())) {
+            return successfulFeedback;
+        }
+        return failedFeedback;
     }
 
     @Override
-    public QuizResponse postAnswer(long id, AnswerRequest answer) {
+    public void deleteQuizById(long id, User user) {
         Optional<Question> quiz = quizRepository.findById(id);
-        if (quiz.isPresent() && Arrays.equals(answer.getAnswer(), quiz.get().getAnswer())) {
-            return new QuizResponse(true, "Congratulations, you're right!");
+        if (quiz.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } else if (quiz.get().getUser().getId() != user.getId()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         } else {
-            return new QuizResponse(false, "Wrong answer! Please, try again.");
+            quizRepository.deleteById(id);
         }
     }
 }

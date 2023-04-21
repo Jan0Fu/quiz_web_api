@@ -1,8 +1,10 @@
 package engine.service;
 
-import engine.model.dto.UserDto;
-import org.springframework.http.ResponseEntity;
+import engine.model.User;
+
+import java.util.Optional;
 
 public interface UserService {
-    ResponseEntity<Object> addUser(UserDto user);
+    void addUser(User user);
+    Optional<User> findUserByEmail(String email);
 }

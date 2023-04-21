@@ -1,13 +1,13 @@
 package engine.model.dto;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import javax.validation.constraints.NotNull;
+import java.util.Set;
 
-@Data
+@AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class AnswerRequest {
-    @NotNull
-    private int[] answer;
+    private Set<Integer> answer;
 }
