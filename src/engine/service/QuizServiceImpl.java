@@ -4,8 +4,12 @@ import engine.model.Question;
 import engine.model.User;
 import engine.model.dto.AnswerRequest;
 import engine.model.dto.FeedbackResponse;
+import engine.model.dto.QuizPageResponse;
 import engine.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -48,8 +52,23 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public List<Question> findAllQuizzes() {
-        return quizRepository.findAll();
+    public QuizPageResponse findAllQuizzes(int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Question> quizzes = quizRepository.findAll(pageable);
+        List<Question> content = quizzes.getContent();
+        return QuizPageResponse.builder()
+                .totalPages(quizzes.getTotalPages())
+                .totalElements(quizzes.getTotalElements())
+                .last(quizzes.isLast())
+                .first(quizzes.isFirst())
+                .sort(quizzes.getSort())
+                .number(quizzes.getNumber())
+                .numberOfElements(quizzes.getNumberOfElements())
+                .size(quizzes.getSize())
+                .empty(quizzes.isEmpty())
+                .pageable(quizzes.getPageable())
+                .content(content)
+                .build();
     }
 
     @Override

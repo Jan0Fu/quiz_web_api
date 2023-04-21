@@ -6,7 +6,6 @@ import engine.model.dto.AnswerRequest;
 import engine.model.dto.FeedbackResponse;
 import engine.model.dto.QuizPageResponse;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface QuizService {
@@ -17,7 +16,7 @@ public interface QuizService {
 
     Optional<Question> getQuizById(long id);
 
-    List<Question> findAllQuizzes();
+    QuizPageResponse findAllQuizzes(int page, int pageSize);
 
     FeedbackResponse feedbackByQuizId(long id, AnswerRequest answer);
 

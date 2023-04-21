@@ -3,7 +3,10 @@ package engine.controller;
 import engine.model.Question;
 import engine.model.User;
 import engine.model.dto.AnswerRequest;
+import engine.model.dto.CompletedQuizResponse;
 import engine.model.dto.FeedbackResponse;
+import engine.model.dto.QuizPageResponse;
+import engine.service.CompletedQuizService;
 import engine.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -22,6 +24,7 @@ import java.util.Optional;
 public class QuizController {
 
     private final QuizService quizService;
+    private final CompletedQuizService completedService;
 
     @PostMapping("/api/quiz")
     public ResponseEntity<FeedbackResponse> feedback(@RequestParam int answer) {
@@ -41,9 +44,12 @@ public class QuizController {
         return ResponseEntity.ok().body(quiz);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Question>> findAllQuizzes() {
-        List<Question> quizzes = quizService.findAllQuizzes();
+    @GetMapping()
+    public ResponseEntity<QuizPageResponse> findAllQuizzes(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "10", required = false) int pageSize) {
+        QuizPageResponse quizzes = quizService.findAllQuizzes(page, pageSize);
         return ResponseEntity.ok().body(quizzes);
     }
 
@@ -52,7 +58,7 @@ public class QuizController {
                                                       @AuthenticationPrincipal User user) {
         FeedbackResponse feedbackResponse = quizService.feedbackByQuizId(id, answer);
         if (feedbackResponse.isSuccess()) {
-//            taskService.addCompletedTask(id, user);
+            completedService.addCompletedQuiz(id, user);
         }
         return ResponseEntity.ok().body(feedbackResponse);
     }
@@ -61,5 +67,13 @@ public class QuizController {
     public ResponseEntity<Void> deleteQuiz(@PathVariable long id, @AuthenticationPrincipal User user) {
         quizService.deleteQuizById(id, user);
         return ResponseEntity.status(204).build();
+    }
+
+    @GetMapping("/completed")
+    public ResponseEntity<CompletedQuizResponse> findAllCompletedQuizzes(
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @AuthenticationPrincipal User user) {
+        CompletedQuizResponse completedQuizzes = completedService.findAllCompletedQuizzes(page, user);
+        return ResponseEntity.ok().body(completedQuizzes);
     }
 }
